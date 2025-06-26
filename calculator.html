@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 16px;
+            box-sizing: border-box;
+        }
+
+        .calculator-container {
+            max-width: 360px;
+            width: 100%;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        #display {
+            min-height: 80px;
+            word-wrap: break-word;
+            overflow-x: auto;
+            white-space: nowrap;
+            display: flex;
+            align-items: flex-end;
+            justify-content: flex-end;
+        }
+
+        .calculator-grid button {
+            transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+        }
+        .calculator-grid button:hover {
+            background-color: #e2e8f0;
+            transform: translateY(-1px);
+        }
+        .calculator-grid button:active {
+            transform: translateY(0);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body class="selection:bg-blue-300">
+    <div class="calculator-container bg-white rounded-2xl p-6">
+        <div id="display" class="bg-gray-800 text-white text-4xl p-4 rounded-xl mb-4 text-right flex items-end justify-end">0</div>
+
+        <div class="calculator-grid grid grid-cols-4 gap-3">
+            <button class="col-span-2 p-4 bg-gray-200 text-gray-800 text-2xl rounded-lg font-semibold shadow-md active:bg-gray-300" onclick="clearDisplay()">AC</button>
+            <button class="p-4 bg-gray-200 text-gray-800 text-2xl rounded-lg font-semibold shadow-md active:bg-gray-300" onclick="deleteLast()">DEL</button>
+            <button class="p-4 bg-orange-500 text-white text-2xl rounded-lg font-semibold shadow-md active:bg-orange-600" onclick="appendOperation('/')">/</button>
+
+            <button class="p-4 bg-gray-100 text-gray-800 text-2xl rounded-lg font-semibold shadow-md active:bg-gray-200" onclick="appendNumber('7')">7</button>
+            <button class="p-4 bg-gray-100 text-gray-800 text-2xl rounded-lg font-semibold shadow-md active:bg-gray-200" onclick="appendNumber('8')">8</button>
+            <button class="p-4 bg-gray-100 text-gray-800 text-2xl rounded-lg font-semibold shadow-md active:bg-gray-200" onclick="appendNumber('9')">9</button>
+            <button class="p-4 bg-orange-500 text-white text-2xl rounded-lg font-semibold shadow-md active:bg-orange-600" onclick="appendOperation('*')">*</button>
+
+            <button class="p-4 bg-gray-100 text-gray-800 text-2xl rounded-lg font-semibold shadow-md active:bg-gray-200" onclick="appendNumber('4')">4</button>
+            <button class="p-4 bg-gray-100 text-gray-800 text-2xl rounded-lg font-semibold shadow-md active:bg-gray-200" onclick="appendNumber('5')">5</button>
+            <button class="p-4 bg-gray-100 text-gray-800 text-2xl rounded-lg font-semibold shadow-md active:bg-gray-200" onclick="appendNumber('6')">6</button>
+            <button class="p-4 bg-orange-500 text-white text-2xl rounded-lg font-semibold shadow-md active:bg-orange-600" onclick="appendOperation('-')">-</button>
+
+            <button class="p-4 bg-gray-100 text-gray-800 text-2xl rounded-lg font-semibold shadow-md active:bg-gray-200" onclick="appendNumber('1')">1</button>
+            <button class="p-4 bg-gray-100 text-gray-800 text-2xl rounded-lg font-semibold shadow-md active:bg-gray-200" onclick="appendNumber('2')">2</button>
+            <button class="p-4 bg-gray-100 text-gray-800 text-2xl rounded-lg font-semibold shadow-md active:bg-gray-200" onclick="appendNumber('3')">3</button>
+            <button class="p-4 bg-orange-500 text-white text-2xl rounded-lg font-semibold shadow-md active:bg-orange-600" onclick="appendOperation('+')">+</button>
+
+            <button class="col-span-2 p-4 bg-gray-100 text-gray-800 text-2xl rounded-lg font-semibold shadow-md active:bg-gray-200" onclick="appendNumber('0')">0</button>
+            <button class="p-4 bg-gray-100 text-gray-800 text-2xl rounded-lg font-semibold shadow-md active:bg-gray-200" onclick="appendOperation('.')">.</button>
+            <button class="p-4 bg-blue-500 text-white text-2xl rounded-lg font-semibold shadow-md active:bg-blue-600" onclick="calculateResult()">=</button>
+        </div>
+    </div>
+
+    <script>
+        const display = document.getElementById('display');
+        let currentInput = '0';
+        let operator = null;
+        let previousInput = '';
+        let shouldResetDisplay = false;
+
+        function updateDisplay(value) {
+            display.textContent = value;
+        }
+
+        function appendNumber(number) {
+            if (shouldResetDisplay) {
+                currentInput = number;
+                shouldResetDisplay = false;
+            } else if (currentInput === '0' && number !== '.') {
+                currentInput = number;
+            } else {
+                currentInput += number;
+            }
+            updateDisplay(currentInput);
+        }
+
+        function appendOperation(op) {
+            if (op === '.' && currentInput.includes('.')) {
+                return;
+            }
+
+            const lastChar = currentInput.slice(-1);
+            if (['+', '-', '*', '/'].includes(lastChar) && ['+', '-', '*', '/'].includes(op)) {
+                currentInput = currentInput.slice(0, -1) + op;
+            } else {
+                if (shouldResetDisplay) {
+                    shouldResetDisplay = false;
+                }
+                currentInput += op;
+            }
+            updateDisplay(currentInput);
+        }
+
+        function clearDisplay() {
+            currentInput = '0';
+            operator = null;
+            previousInput = '';
+            shouldResetDisplay = false;
+            updateDisplay(currentInput);
+        }
+
+        function deleteLast() {
+            if (currentInput.length > 1) {
+                currentInput = currentInput.slice(0, -1);
+            } else {
+                currentInput = '0';
+            }
+            updateDisplay(currentInput);
+        }
+
+        function calculateResult() {
+            try {
+                if (currentInput.trim() === '' || ['+', '-', '*', '/'].includes(currentInput.slice(-1))) {
+                    display.textContent = 'Error';
+                    currentInput = '0';
+                    return;
+                }
+
+                let result = eval(currentInput);
+                if (isNaN(result) || !isFinite(result)) {
+                    display.textContent = 'Error';
+                } else {
+                    display.textContent = result;
+                    currentInput = result.toString();
+                }
+            } catch (error) {
+                display.textContent = 'Error';
+            } finally {
+                shouldResetDisplay = true;
+            }
+        }
+
+        window.onload = () => {
+            updateDisplay('0');
+        };
+    </script>
+</body>
+</html>
